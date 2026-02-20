@@ -40,7 +40,6 @@ export default function Home() {
       const form = new FormData();
       form.append("image", file);
 
-      // Let op: zorg dat de URL overeenkomt met je route (/api/extract of /api/vision)
       const res = await fetch("/api/extract", {
         method: "POST",
         body: form,
@@ -48,14 +47,10 @@ export default function Home() {
 
       const data = await res.json();
 
-      // --- DIT IS HET NIEUWE DEEL VOOR DE BEVEILIGING ---
       if (!res.ok) {
-        // Hier vangen we de 429 (Rate Limit) of 500 (API Error) op
-        setError(data?.message || "Er ging iets mis bij het verwerken.");
-        setLoading(false);
+        setError(data?.message ?? "Upload mislukt.");
         return;
       }
-      // ------------------------------------------------
 
       // ✅ payload + scope opslaan
       sessionStorage.setItem("quiz_payload", JSON.stringify(data.extracted));
@@ -64,14 +59,15 @@ export default function Home() {
 
       // 🔥 forceer reset van quiz
       window.location.href = "/quiz?reset=" + Date.now();
-    } catch (err) {
-      setError("Netwerkfout. Controleer je verbinding en probeer opnieuw.");
+    } catch {
+      setError("Netwerkfout. Probeer opnieuw.");
     } finally {
       setLoading(false);
     }
   }
 
   function continueWithExisting() {
+    // Scope ook toepassen bij verdergaan
     sessionStorage.setItem("quiz_scope", scope);
     window.location.href = "/quiz?reset=" + Date.now();
   }
@@ -87,10 +83,11 @@ export default function Home() {
     <main className="min-h-screen p-8 max-w-md mx-auto">
       <h1 className="text-3xl font-bold mb-4">Woordjes Trainer 📘</h1>
 
+      {/* ✅ Scope altijd zichtbaar */}
       <div className="mb-6 border p-4 rounded-lg">
         <p className="font-medium mb-2">Hoeveel wil je oefenen?</p>
 
-        <label className="block cursor-pointer">
+        <label className="block">
           <input
             type="radio"
             name="scope"
@@ -101,7 +98,7 @@ export default function Home() {
           30% (kort oefenen)
         </label>
 
-        <label className="block cursor-pointer">
+        <label className="block">
           <input
             type="radio"
             name="scope"
@@ -112,7 +109,7 @@ export default function Home() {
           70% (goed oefenen)
         </label>
 
-        <label className="block cursor-pointer">
+        <label className="block">
           <input
             type="radio"
             name="scope"
@@ -129,14 +126,14 @@ export default function Home() {
           <p className="text-lg">Wat wil je doen?</p>
 
           <button
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded transition-colors"
+            className="w-full bg-blue-600 text-white px-4 py-3 rounded"
             onClick={continueWithExisting}
           >
             🔁 Ga verder met dezelfde woorden
           </button>
 
           <button
-            className="w-full border border-gray-300 hover:bg-gray-50 px-4 py-3 rounded transition-colors"
+            className="w-full border px-4 py-3 rounded"
             onClick={clearPayload}
           >
             📸 Nieuwe foto uploaden
@@ -144,29 +141,23 @@ export default function Home() {
         </div>
       ) : (
         <form onSubmit={uploadNewPhoto} className="border p-6 rounded-lg space-y-4">
-          <p className="text-gray-600">Upload een foto van een woordenlijst uit je schoolboek.</p>
+          <p>Upload een foto van een woordenlijst uit je schoolboek.</p>
 
-          <input
-            type="file"
-            accept="image/*"
-            className="w-full"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            disabled={loading}
-          />
+         <input
+  type="file"
+  accept="image/*"
+  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+/>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 disabled:opacity-50 text-white px-4 py-3 rounded font-bold transition-opacity"
+            className="bg-blue-600 disabled:opacity-50 text-white px-4 py-2 rounded"
           >
-            {loading ? "Bezig met analyseren..." : "Start oefenen"}
+            {loading ? "Bezig..." : "Start oefenen"}
           </button>
 
-          {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 mt-4">
-              <p className="text-red-700 text-sm">{error}</p>
-            </div>
-          )}
+          {error && <p className="text-red-600">{error}</p>}
         </form>
       )}
     </main>
