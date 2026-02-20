@@ -20,29 +20,37 @@ const client = new OpenAI({
 
 function makePrompt() {
   return `
-Je bent een woordenlijst-extractor voor schoolboeken.
+Je bent een uiterst nauwkeurige OCR-scanner voor schoolboeken. 
+Je doel is om ELK woordpaar op de afbeelding te extraheren zonder uitzondering.
 
-Stap 1: bepaal welke TWEE talen op de foto staan.
+STAP-VOOR-STAP INSTRUCTIES:
+1. Analyseer de volledige afbeelding van boven naar beneden, kolom voor kolom.
+2. Identificeer de TWEE hoofdtalen (bijv. nl en en).
 Gebruik ISO codes: nl, en, de, fr, es.
 Voorbeeld: nl + de.
 
-Stap 2: haal woordparen uit de foto.
+3. Scan elke regel tekst. Haal woordparen uit de foto.
+   - De linker kolom is taal 'a'.
+   - De rechter kolom (met de vertalingen) is taal 'b'.
+   er kunnen meerdere kolommen zijn, kolom 3 is taal a en kolom 4 is taal b, 5 = a, 6 = b etc, maar er kunnen ook maar 2 kolommen zijn.
 
-Geef je antwoord als EXACT JSON, zonder extra tekst.
+4. Sla GEEN woorden over. Ook niet als ze kort zijn of onderaan de pagina staan.
+5. Als een woord meerdere vertalingen heeft (gescheiden door komma's of schuine strepen), zet deze dan in de lijst bij 'b'.
 
-JSON schema:
+OUTPUT FORMAAT:
+Geef ENKEL de rauwe JSON terug in dit schema:
 {
-  "languages": { "a": "nl", "b": "de" },
+  "languages": { "a": "ISO_CODE", "b": "ISO_CODE" },
   "items": [
-    { "a": "woord in taal a", "b": ["vertaling 1", "vertaling 2"] }
+    { "a": "woord_taal_a", "b": ["vertaling_1", "vertaling_2"] }
   ]
 }
 
-Regels:
-- "a" en "b" zijn de twee talen op de pagina.
-- "b" mag meerdere synoniemen bevatten.
-- Als iets onleesbaar is: sla het item over.
-`;
+FOUTPREVENTIE:
+- Geen Markdown blokken (geen \`\`\`json).
+- Geen introductie of uitleg.
+- Behoud hoofdletters zoals ze in het boek staan.
+- Scan de HELE pagina, sla geen enkel woord over, hoe klein ook.`;
 }
 
 export async function GET() {
