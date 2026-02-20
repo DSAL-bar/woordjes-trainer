@@ -126,20 +126,50 @@ export default function Home() {
 
       {hasPayload ? (
         <div className="space-y-4">
+
+{/* --- NIEUW: Overzicht van de woorden --- */}
+    <div className="bg-gray-50 border rounded-lg p-4 mb-4">
+      <h2 className="font-bold text-lg mb-2">Gescande woorden 📋</h2>
+      
+      {/* We halen de data even uit de storage voor de weergave */}
+      {(() => {
+        const data = JSON.parse(sessionStorage.getItem("quiz_payload") || "{}");
+        const items = data.items || [];
+        const count = items.length;
+
+        return (
+          <>
+            <p className="text-sm text-gray-600 mb-3">
+              Er zijn <strong>{count}</strong> woordparen gevonden.
+            </p>
+            <div className="max-h-40 overflow-y-auto border-t pt-2 space-y-1">
+              {items.map((item: any, index: number) => (
+                <div key={index} className="text-sm flex justify-between border-b border-gray-100 py-1">
+                  <span className="font-medium text-blue-700">{item.a}</span>
+                  <span className="text-gray-500">{Array.isArray(item.b) ? item.b.join(", ") : item.b}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        );
+      })()}
+    </div>
+    {/* --- EINDE NIEUW --- */}
+
           <p className="text-lg">Wat wil je doen?</p>
 
           <button
             className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded transition-colors"
             onClick={continueWithExisting}
           >
-            🔁 Ga verder met dezelfde woorden
-          </button>
+            🔁 Start oefenen met deze {JSON.parse(sessionStorage.getItem("quiz_payload") || "{}").items?.length} woorden
+    </button>
 
           <button
             className="w-full border border-gray-300 hover:bg-gray-50 px-4 py-3 rounded transition-colors"
             onClick={clearPayload}
           >
-            📸 Nieuwe foto uploaden
+            📸 Andere foto uploaden
           </button>
         </div>
       ) : (
