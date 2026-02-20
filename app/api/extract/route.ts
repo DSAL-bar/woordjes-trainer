@@ -10,10 +10,7 @@ const MAX_REQUESTS = 3;      // Maximaal 3 foto's per minuut
 // ----------------------------------------------
 
 console.log("OPENAI_API_KEY length:", process.env.OPENAI_API_KEY?.length);
-console.log(
-  "OPENAI_API_KEY starts with sk-:",
-  process.env.OPENAI_API_KEY?.startsWith("sk-")
-);
+console.log("OPENAI_API_KEY starts with sk-:",  process.env.OPENAI_API_KEY?.startsWith("sk-"));
 
 export const runtime = "nodejs"; // nodig voor Buffer
 
@@ -101,22 +98,25 @@ export async function POST(req: Request) {
     const dataUrl = `data:${file.type || "image/jpeg"};base64,${base64}`;
 
     // Vision request
-    const response = await client.responses.create({
-      model: "gpt-4o-mini", // Let op: kleine correctie in modelnaam indien nodig (gpt-4o-mini)
-      input: [
-        {
-          role: "user",
-          content: [
-            { type: "input_text", text: makePrompt() },
-            {
-              type: "input_image",
-              image_url: dataUrl,
-              detail: "low",
-            } as any,
-          ],
+   const response = await client.responses.create({
+  model: "gpt-4o-mini", // Je kunt gpt-4o proberen voor maximale precisie
+  input: [
+    {
+      role: "user",
+      content: [
+        { 
+          type: "input_text", 
+          text: makePrompt() + "\nBELANGRIJK: Scan de HELE pagina. Sla geen enkel woord over, hoe klein ook." 
         },
+        {
+          type: "input_image",
+          image_url: dataUrl,
+          detail: "high", // ⚡ FIX 1: Verander 'low' naar 'high'
+        } as any,
       ],
-    });
+    },
+  ],
+});
 
     const text = 
       (response as any).output_text ?? 
