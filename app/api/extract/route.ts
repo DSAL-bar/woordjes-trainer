@@ -89,9 +89,14 @@ export async function POST(req: Request) {
   ],
 });
 
-const text =
-  response.output_text ??
-  response.output?.[0]?.content?.[0]?.text;
+//const text =
+//  response.output_text ??
+//  response.output?.[0]?.content?.[0]?.text;
+
+const text = 
+  (response as any).output_text ?? 
+  (response as any).output?.[0]?.content?.[0]?.text ?? 
+  "";
 
 if (!text) {
   return NextResponse.json(
